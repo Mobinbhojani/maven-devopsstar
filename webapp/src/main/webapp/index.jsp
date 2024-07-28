@@ -1,6 +1,6 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>New user Register for Devops master Learning at Devops TechLab. happy to see you learning</h1>
+    <h1>New user Register for AWS master Learning at Devops TechLab. happy to see you learning</h1>
     <p>Please fill in this form to create an account.</p>
     <hr>
      
