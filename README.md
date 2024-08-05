@@ -1,3 +1,1 @@
-build trigger check
-by poll scm
-testing webhook
+testing webhook trigger
