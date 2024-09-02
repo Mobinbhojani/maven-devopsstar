@@ -11,10 +11,10 @@ pipeline {
             steps {
                 echo "doing build"
                 sh '''
-                docker build -t mobinbhojani/tomcatstar:${BUILD_NUMBER} .
-                docker tag mobinbhojani/tomcatstar:${BUILD_NUMBER} mobinbhojani/tomcatstar:latest
-                docker push mobinbhojani/tomcatstar:${BUILD_NUMBER}
-                docker push mobinbhojani/tomcatstar:latest
+                docker build -t mobinbhojani/javaproject-star:${BUILD_NUMBER} .
+                docker tag mobinbhojani/javaproject-star:${BUILD_NUMBER} mobinbhojani/javaproject-star:latest
+                docker push mobinbhojani/javaproject-star:${BUILD_NUMBER}
+                docker push mobinbhojani/javaproject-star:latest
                 '''
             }
         }
