@@ -4,7 +4,7 @@ pipeline {
         stage('git-code-download') {
             steps {
                 echo "download code from git"
-                git branch: 'main', url: 'https://github.com/Mobinbhojani/registration-app.git'
+                git branch: 'main', url: 'https://github.com/Mobinbhojani/maven-devopsstar.git'
             }
         }
         stage('build') {
