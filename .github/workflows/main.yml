@@ -19,7 +19,7 @@ jobs:
 
       - name: Deploy to Tomcat
         run: |
-          WAR_NAME=$(ls target/*.war | head -n1)
+          WAR_NAME=$(sudo ls target/*.war | head -n1)
           sudo cp "$WAR_NAME" /opt/tomcat11/webapps/app.war
           echo "WAR deployed to Tomcat as app.war"
 
