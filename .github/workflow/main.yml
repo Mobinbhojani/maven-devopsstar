@@ -1,0 +1,24 @@
+name: Build and Deploy to Tomcat
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Deploy to Tomcat
+        run: |
+          WAR_NAME=$(ls target/*.war | head -n1)
+          sudo cp "$WAR_NAME" /opt/tomcat11/webapps/app.war
+          echo "WAR deployed to Tomcat as app.war"
+
