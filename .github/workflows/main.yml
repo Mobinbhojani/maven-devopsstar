@@ -7,32 +7,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: self-hosted
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Build WAR with Maven
-        run: mvn clean package
+      - name: Login To Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Copy WAR to Remote EC2 via SCP
-        run: |
-          REMOTE_USER=ubuntu
-          REMOTE_HOST=13.201.100.44
-          TEMP_PATH=/home/ubuntu/app.war
+      - name: Build Docker Image
+        run: docker build -t mobinbhojani/tomcatstar:latest .
 
-          WAR_PATH=$(ls webapp/target/*.war | head -n1)
-          echo "WAR found at $WAR_PATH"
+      - name: Publish image to Docker Hub
+        run: docker push mobinbhojani/tomcatstar:latest
+  deploy:
+    runs-on: self-hosted	
 
-          echo "Copying WAR to remote EC2..."
-          scp -i ~/.ssh/id_ed25519 "$WAR_PATH" "$REMOTE_USER@$REMOTE_HOST:$TEMP_PATH"
-
-      - name: Move WAR and Restart Tomcat
+    steps:
+      - name: Deploy Docker Image to Remote EC2
         run: |
           ssh -i ~/.ssh/id_ed25519 ubuntu@13.201.100.44 << 'EOF'
-          sudo mv /home/ubuntu/app.war /opt/tomcat11/webapps/app.war
-          sudo systemctl restart tomcat
+            docker pull mobinbhojani/tomcatstar:latest
+            
+            # Stop and remove any existing container (optional)
+            docker rm -f tomcatstar || true
+            
+            # Run the new container
+            docker run -d --name tomcatstar -p 8080:8080 mobinbhojani/tomcatstar:latest
           EOF
 
