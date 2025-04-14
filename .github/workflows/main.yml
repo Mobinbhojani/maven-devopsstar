@@ -21,16 +21,18 @@ jobs:
         run: |
           REMOTE_USER=ubuntu
           REMOTE_HOST=13.201.100.44
-          REMOTE_TOMCAT_PATH=/opt/tomcat11/webapps
+          TEMP_PATH=/home/ubuntu/app.war
 
-          WAR_PATH=$(ls /home/ubuntu/maven-devopsstar/webapp/target/*.war | head -n1)
+          WAR_PATH=$(ls webapp/target/*.war | head -n1)
           echo "WAR found at $WAR_PATH"
 
           echo "Copying WAR to remote EC2..."
-          scp -i ~/.ssh/id_ed25519 "$WAR_PATH" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_TOMCAT_PATH/app.war"
+          scp -i ~/.ssh/id_ed25519 "$WAR_PATH" "$REMOTE_USER@$REMOTE_HOST:$TEMP_PATH"
 
-      - name: Restart Tomcat on Remote EC2
+      - name: Move WAR and Restart Tomcat
         run: |
           ssh -i ~/.ssh/id_ed25519 ubuntu@13.201.100.44 << 'EOF'
+          sudo mv /home/ubuntu/app.war /opt/tomcat11/webapps/app.war
           sudo systemctl restart tomcat
           EOF
+
