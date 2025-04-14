@@ -1,4 +1,4 @@
-name: Build and Deploy to Remote EC2 Tomcat
+name: Docker Build & Deploy via CodeDeploy
 
 on:
   push:
@@ -14,28 +14,34 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Login To Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Build Docker Image
         run: docker build -t mobinbhojani/tomcatstar:latest .
 
-      - name: Publish image to Docker Hub
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker Image
         run: docker push mobinbhojani/tomcatstar:latest
+
+      - name: Zip Deployment Package
+        run: zip -r deploy.zip appspec.yml scripts/ Dockerfile webapp/
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp deploy.zip s3://aws-s3-iqit/deploy.zip \
+            --region ap-south-1 \
+            --profile default
+  
   deploy:
-    runs-on: self-hosted	
-    needs: build
+    runs-on: self-hosted
 
     steps:
-      - name: Deploy Docker Image to Remote EC2
+      - name: Deploy with CodeDeploy
         run: |
-          ssh -i ~/.ssh/id_ed25519 ubuntu@13.201.100.44 << 'EOF'
-            docker pull mobinbhojani/tomcatstar:latest
-            
-            # Stop and remove any existing container (optional)
-            docker rm -f tomcatstar || true
-            
-            # Run the new container
-            docker run -d --name tomcatstar -p 8081:8080 mobinbhojani/tomcatstar:latest
-          EOF
+          aws deploy create-deployment \
+            --application-name github-actions \
+            --deployment-group-name github-actions-maven-devops-star \
+            --s3-location bucket=aws-s3-iqit,bundleType=zip,key=deploy.zip \
+            --region ap-south-1 \
+            --profile default
 
