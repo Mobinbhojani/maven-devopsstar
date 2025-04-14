@@ -1,4 +1,4 @@
-name: Build and Deploy to Tomcat
+name: Build and Deploy to Remote EC2 Tomcat
 
 on:
   push:
@@ -14,12 +14,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Build with Maven
+      - name: Build WAR with Maven
         run: mvn clean package
 
-      - name: Deploy to Tomcat
+      - name: Copy WAR to Remote EC2 via SCP
         run: |
-          WAR_NAME=$(ls /home/ubuntu/maven-devopsstar/webapp/target/*.war | head -n1)
-          sudo cp "$WAR_NAME" /opt/tomcat11/webapps/app.war
-          echo "WAR deployed to Tomcat as app.war"
+          REMOTE_USER=ubuntu
+          REMOTE_HOST=13.201.100.44
+          REMOTE_TOMCAT_PATH=/opt/tomcat11/webapps
 
+          WAR_PATH=$(ls /home/ubuntu/maven-devopsstar/webapp/target/*.war | head -n1)
+          echo "WAR found at $WAR_PATH"
+
+          echo "Copying WAR to remote EC2..."
+          scp -i ~/.ssh/id_ed25519 "$WAR_PATH" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_TOMCAT_PATH/app.war"
+
+      - name: Restart Tomcat on Remote EC2
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ubuntu@13.201.100.44 << 'EOF'
+          sudo systemctl restart tomcat
+          EOF
