@@ -24,6 +24,7 @@ jobs:
         run: docker push mobinbhojani/tomcatstar:latest
   deploy:
     runs-on: self-hosted	
+    needs: build
 
     steps:
       - name: Deploy Docker Image to Remote EC2
