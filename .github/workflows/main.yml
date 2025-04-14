@@ -41,7 +41,7 @@ jobs:
         run: |
           aws deploy create-deployment \
             --application-name github-actions \
-            --deployment-group-name github-actions-maven-devops-star \
+            --deployment-group-name github-action-maven-devops-star \
             --s3-location bucket=aws-s3-iqit,bundleType=zip,key=deploy.zip \
             --region ap-south-1 \
             --profile default
