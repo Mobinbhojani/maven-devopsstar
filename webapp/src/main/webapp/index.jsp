@@ -1,6 +1,6 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>New user Register for devops master course Learning at Devops TechLab by Janak Thkkar. happy to see you learning</h1>
+    <h1>Welcome to the IQ INFINITE PVT LTD</h1>
     <p>Please fill in this form to create an account.</p>
     <hr>
      
