@@ -1,0 +1,48 @@
+name: Docker Build & Deploy via CodeDeploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: docker build -t mobinbhojani/tomcatstar:latest .
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker Image
+        run: docker push mobinbhojani/tomcatstar:latest
+
+      - name: Zip Deployment Package
+        run: zip -r deploy.zip appspec.yml scripts/ Dockerfile webapp/
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp deploy.zip s3://aws-s3-iqit/deploy.zip \
+            --region ap-south-1 \
+            --profile default
+  
+  deploy:
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+      - name: Deploy with CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name github-actions \
+            --deployment-group-name github-action-maven-devops-star \
+            --s3-location bucket=aws-s3-iqit,bundleType=zip,key=deploy.zip \
+            --region ap-south-1 \
+            --profile default
+

@@ -1,6 +1,6 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Welcome to the IQ INFINITE PVT LTD</h1>
+    <h1>New user Register for iq infinite technologies services</h1>
     <p>Please fill in this form to create an account.</p>
     <hr>
      
